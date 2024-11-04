@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  dashboard-backend:
+    build: ./dashboard-backend
+    container_name: dashboard-backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/shopdb
+    networks:
+      - app-network
+
+  website-backend:
+    build: ./website-backend
+    container_name: website-backend
+    ports:
+      - "5001:5001"
+    depends_on:
+      - mongodb
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/shopdb
+    networks:
+      - app-network
+
+  dashboard-frontend:
+    build: ./dashboard-frontend
+    container_name: dashboard-frontend
+    ports:
+      - "3001:3000"
+    networks:
+      - app-network
+
+  website-frontend:
+    build: ./website-frontend
+    container_name: website-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  app-network:
+    driver: bridge
